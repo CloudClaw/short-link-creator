@@ -1,11 +1,15 @@
 import 'dotenv/config';
 import express from 'express';
-
+import shortnerRouter from './shortner/shortner.router';
 import { errorHandler } from './middlewares/error-handler';
+
+const { PORT } = process.env;
 
 const app = express();
 
-const { PORT } = process.env;
+app.use(express.json());
+
+app.use(shortnerRouter);
 
 app.use(errorHandler);
 
