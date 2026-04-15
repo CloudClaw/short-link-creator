@@ -2,13 +2,14 @@ export const getShortUrl = async (originalUrl: string): Promise<string> => {
   const response = await fetch(process.env.SHORTNER_API_URL as string, {
     method: 'POST',
     headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/x-www-form-urlencoded',
+      'Content-Type': 'application/json'
     },
-    body: new URLSearchParams({ url: originalUrl })
+    body: JSON.stringify({
+        long_url: originalUrl
+    })
   });
 
-  const { short_url } = await response.json();
+  const {short_url} = await response.json();
 
   return short_url;
 };

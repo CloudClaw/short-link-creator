@@ -11,14 +11,12 @@ export const createShortUrl = async (
   try {
     const shortLink = await getShortUrl(url);
 
-    console.log('shortLink', shortLink)
-
     res.status(201).send({
-        originalLink: url,
-        shortLink
+      originalLink: url,
+      shortLink,
     });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     next(error);
   }
 };
