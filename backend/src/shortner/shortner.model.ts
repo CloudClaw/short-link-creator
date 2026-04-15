@@ -6,6 +6,7 @@ interface IShortner {
   owner: Schema.Types.ObjectId;
   createdAt?: Date;
   updatedAt?: Date;
+  checkOwner: (userId: string) => boolean;
 }
 
 const shortnerSchema = new Schema<IShortner>(
@@ -22,13 +23,17 @@ const shortnerSchema = new Schema<IShortner>(
       type: Schema.Types.ObjectId,
       ref: 'users',
       required: true,
-    }
+    },
   },
   {
     timestamps: true,
     versionKey: false,
   },
 );
+
+shortnerSchema.methods.checkOwner = function (userId: string) {
+  return this.owner.toString() === userId;
+};
 
 const Shortner = model<IShortner>('shortners', shortnerSchema);
 

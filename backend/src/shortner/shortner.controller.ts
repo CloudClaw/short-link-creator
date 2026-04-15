@@ -4,7 +4,8 @@ import { Error as MongooseError } from 'mongoose';
 import Shortner from './shortner.model';
 import { transformError } from '../helpers/transform-error';
 import BadRequestError from '../errors/bad-request-error';
-import { link } from 'fs';
+import ForbiddenError from '../errors/forbidden-error';
+import NotFoundError from '../errors/not-found-error';
 
 export const createShortUrl = async (
   req: Request,
@@ -46,16 +47,90 @@ export const getAllShortnerLinksByUser = async (
   const ownerId = res.locals.user.id;
 
   try {
-    const shortLinks = await (Shortner.find({ owner: ownerId })) || [];
+    const shortLinks = (await Shortner.find({ owner: ownerId })) || [];
 
     res.send(
-      shortLinks.map(link => ({
+      shortLinks.map((link) => ({
         id: link._id,
         originalLink: link.originalLink,
         shortLink: link.shortLink,
       })),
     );
   } catch (error) {
+    next(error);
+  }
+};
+
+export const updateShortLink = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const id = req.params.id;
+  const url = req.body.url;
+  const ownerId = res.locals.user.id;
+
+  try {
+    const currentShortLink = await Shortner.findById(id).orFail();
+
+    if (!currentShortLink.checkOwner(ownerId)) {
+      return next(new ForbiddenError('You have no access to this resource'));
+    }
+
+    const shortLink = await getShortUrl(url);
+
+    await currentShortLink.updateOne({
+      originalLink: url,
+      shortLink,
+    });
+
+    await currentShortLink.save();
+
+    res.send({ id, originalLink: url, shortLink });
+  } catch (error) {
+    if (error instanceof MongooseError.CastError) {
+      return next(new BadRequestError('Invalid Id'));
+    }
+
+    if (error instanceof MongooseError.DocumentNotFoundError) {
+      return next(new NotFoundError('Short link not found'));
+    }
+
+    if (error instanceof MongooseError.ValidationError) {
+      const errors = transformError(error);
+      return next(new BadRequestError(errors[0].message));
+    }
+    next(error);
+  }
+};
+
+export const removeShortLink = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const id = req.params.id;
+  const ownerId = res.locals.user.id;
+
+  try {
+    const shortLink = await Shortner.findById(id).orFail();
+
+    if (!shortLink.checkOwner(ownerId)) {
+      return next(new ForbiddenError('You have no access to this resource'));
+    }
+
+    await Shortner.findByIdAndDelete(id).orFail();
+
+    res.send({ id: id, message: 'ok' });
+  } catch (error) {
+    if (error instanceof MongooseError.CastError) {
+      return next(new BadRequestError('Invalid Id'));
+    }
+
+    if (error instanceof MongooseError.DocumentNotFoundError) {
+      return next(new NotFoundError('Short link not found'));
+    }
+
     next(error);
   }
 };

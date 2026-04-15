@@ -8,6 +8,8 @@ const router = Router();
  * /users:
  *   post:
  *     summary: Create a new user
+ *     tags:
+ *       - User CRUD
  *     requestBody:
  *       required: true
  *       content:
@@ -40,6 +42,8 @@ router.post('/users', createUser);
  * /users/login:
  *   post:
  *     summary: Log in a user
+ *     tags:
+ *       - User CRUD
  *     requestBody:
  *       required: true
  *       content:
@@ -72,6 +76,8 @@ router.post('/users/login', logInUser);
  * /users/logout:
  *   post:
  *     summary: Log out a user
+ *     tags:
+ *       - User CRUD
  *     requestBody:
  *       required: true
  *       content:
