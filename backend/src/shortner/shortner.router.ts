@@ -26,6 +26,9 @@ const router = Router();
  *             schema:
  *               type: object
  *               properties:
+ *                 id:
+ *                   type: string
+ *                   example: 507f1f77bcf86cd799439011
  *                 originalLink:
  *                   type: string
  *                   example: https://redux-toolkit.js.org/api/createAsyncThunk
