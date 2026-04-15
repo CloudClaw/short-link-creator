@@ -14,6 +14,7 @@ export default (req: Request, res: Response, next: NextFunction) => {
     const payload = jwt.verify(accessToken, JWT_SECRET as string) as {
       id: string;
     };
+
     res.locals.user = payload;
     next();
   } catch {

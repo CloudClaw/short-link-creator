@@ -21,7 +21,7 @@ export const createUser = async (
 
     res
       .status(201)
-      .cookie('acessToken', accessToken, {
+      .cookie('accessToken', accessToken, {
         httpOnly: true,
         secure: NODE_ENV === 'production',
         maxAge: MAX_COOKIE_AGE,
@@ -55,7 +55,7 @@ export const logInUser = async (
 
     res
       .status(201)
-      .cookie('acessToken', accessToken, {
+      .cookie('accessToken', accessToken, {
         httpOnly: true,
         secure: NODE_ENV === 'production',
         maxAge: MAX_COOKIE_AGE,
@@ -68,7 +68,7 @@ export const logInUser = async (
 
 export const logOutUser = async (req: Request, res: Response) => {
   res
-    .clearCookie('acessToken', {
+    .clearCookie('accessToken', {
       httpOnly: true,
     })
     .json({ message: 'ok' });

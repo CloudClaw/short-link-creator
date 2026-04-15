@@ -20,10 +20,10 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use(express.json());
 app.use(cookieParser());
 
-app.use(shortnerRouter);
 app.use(userRouter);
 
 app.use(authMiddleware);
+app.use(shortnerRouter);
 
 app.use(errorHandler);
 

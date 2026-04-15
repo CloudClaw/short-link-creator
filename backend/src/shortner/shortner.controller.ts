@@ -4,6 +4,7 @@ import { Error as MongooseError } from 'mongoose';
 import Shortner from './shortner.model';
 import { transformError } from '../helpers/transform-error';
 import BadRequestError from '../errors/bad-request-error';
+import { link } from 'fs';
 
 export const createShortUrl = async (
   req: Request,
@@ -11,14 +12,16 @@ export const createShortUrl = async (
   next: NextFunction,
 ) => {
   const url = req.body.url;
+  const ownerId = res.locals.user.id;
 
   try {
     const shortLink = await getShortUrl(url);
 
     const newShortUrl = await Shortner.create({
       originalLink: url,
-      shortLink
-    })
+      shortLink,
+      owner: ownerId,
+    });
 
     res.status(201).send({
       id: newShortUrl._id,
@@ -31,6 +34,28 @@ export const createShortUrl = async (
 
       return next(new BadRequestError(errors[0].message));
     }
+    next(error);
+  }
+};
+
+export const getAllShortnerLinksByUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const ownerId = res.locals.user.id;
+
+  try {
+    const shortLinks = await (Shortner.find({ owner: ownerId })) || [];
+
+    res.send(
+      shortLinks.map(link => ({
+        id: link._id,
+        originalLink: link.originalLink,
+        shortLink: link.shortLink,
+      })),
+    );
+  } catch (error) {
     next(error);
   }
 };
