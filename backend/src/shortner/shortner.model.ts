@@ -3,7 +3,7 @@ import { Schema, model } from 'mongoose';
 interface IShortner {
   originalLink: string;
   shortLink: string;
-  //owner
+  owner: Schema.Types.ObjectId;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -18,6 +18,11 @@ const shortnerSchema = new Schema<IShortner>(
       type: String,
       required: [true, 'Short link is required'],
     },
+    owner: {
+      type: Schema.Types.ObjectId,
+      ref: 'users',
+      required: true,
+    }
   },
   {
     timestamps: true,

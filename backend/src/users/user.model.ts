@@ -1,5 +1,6 @@
 import { Schema, Document, Model, model } from 'mongoose';
 import jwt from 'jsonwebtoken';
+import { compare, genSalt, hash } from 'bcryptjs';
 import { JWT_SECRET } from '../constants';
 import NotAuthorizedError from '../errors/not-authorized-error';
 
@@ -14,7 +15,10 @@ interface IUser {
 interface IUserDoc extends Document, IUser {}
 
 interface IUserModel extends Model<IUserDoc> {
-  findUserByCredentials: (email: string, password: string) => Promise<IUserDoc | never>;
+  findUserByCredentials: (
+    email: string,
+    password: string,
+  ) => Promise<IUserDoc | never>;
 }
 
 const userSchema = new Schema<IUser>(
@@ -60,6 +64,18 @@ const userSchema = new Schema<IUser>(
   },
 );
 
+userSchema.pre('save', async function (next) {
+  try {
+    // Если поле создано или модифицировано
+    if (this.isModified('password')) {
+      const salt = await genSalt(10);
+      this.password = await hash(this.password, salt);
+    }
+  } catch (error) {
+    next(error as Error);
+  }
+});
+
 userSchema.methods.generateAcessToken = function () {
   return jwt.sign(
     {
@@ -72,7 +88,7 @@ userSchema.methods.generateAcessToken = function () {
 
 userSchema.statics.findUserByCredentials = async function (
   email: string,
-  password: string
+  password: string,
 ) {
   const user = await this.findOne({ email })
     .select('+password')
@@ -80,7 +96,13 @@ userSchema.statics.findUserByCredentials = async function (
       () => new NotAuthorizedError('User with provided credentials not found'),
     );
 
-  return user;
+  const isCorrectPassword = await compare(password, user.password);
+
+  if (isCorrectPassword) {
+    return user;
+  }
+
+  throw new NotAuthorizedError('Invalid credentials');
 };
 
 const User = model<IUser, IUserModel>('users', userSchema);

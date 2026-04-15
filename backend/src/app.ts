@@ -9,6 +9,7 @@ import authMiddleware from './middlewares/auth';
 
 import { errorHandler } from './middlewares/error-handler';
 import { MONGO_URL, PORT, SWAGGER_OPTIONS } from './constants';
+import cookieParser from 'cookie-parser';
 
 const app = express();
 
@@ -17,6 +18,7 @@ const swaggerDocs = swaggerJsDoc(SWAGGER_OPTIONS);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.use(shortnerRouter);
 app.use(userRouter);
