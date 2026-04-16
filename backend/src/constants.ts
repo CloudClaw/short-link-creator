@@ -1,4 +1,4 @@
-export const { PORT, MONGO_URL, JWT_SECRET } = process.env;
+export const { PORT, MONGO_URL, JWT_SECRET, FRONTEND_URL } = process.env;
 
 export const SWAGGER_OPTIONS = {
   failOnErrors: true,
